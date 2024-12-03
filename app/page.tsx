@@ -115,6 +115,17 @@ export default function Home() {
    * Sends a transaction using the native AA Particle provider with gasless mode.
    */
   const executeTxNative = async () => {
+    const info = await smartAccount?.getAccount();
+    console.log("Account info:", info);
+    const tx = {  
+      to: '0x...',
+      value: '0x...'
+  }
+ 
+  console.log("Sending transaction..smartAccount ",smartAccount?.getChainId());
+  const feeQuotesResult = await smartAccount?.getFeeQuotes(tx);
+    
+    console.log("Sending transaction...");
     setIsSending(true);
     try {
       const tx = {
@@ -125,6 +136,7 @@ export default function Home() {
 
       // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
       const feeQuotesResult = await smartAccount?.getFeeQuotes(tx);
+      console.log("Fee quotes result:", feeQuotesResult);
       const { userOp, userOpHash } =
         feeQuotesResult?.verifyingPaymasterGasless || {};
 
