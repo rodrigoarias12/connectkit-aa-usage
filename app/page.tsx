@@ -311,7 +311,7 @@ export default function Home() {
 
     setIsSending(true);
     //create vote transaction 
- 
+   try{
       const tx = {
         to: contractAddress,
         data: contract.interface.encodeFunctionData("vote", [1]),
