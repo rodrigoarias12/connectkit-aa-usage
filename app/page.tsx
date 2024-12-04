@@ -154,22 +154,189 @@ export default function Home() {
    * This transaction is gasless since the customProvider is initialized as gasless
    */
   const executeTxEthers = async () => {
-    if (!customProvider) return;
+    console.log("Sending transaction...");
+    const abi = 
+      [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            }
+          ],
+          "name": "delegate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "voter",
+              "type": "address"
+            }
+          ],
+          "name": "giveRightToVote",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32[]",
+              "name": "proposalNames",
+              "type": "bytes32[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "proposal",
+              "type": "uint256"
+            }
+          ],
+          "name": "vote",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "chairperson",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "proposals",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "name",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "voteCount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "voters",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "weight",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "voted",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "delegate",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "vote",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "winnerName",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "winnerName_",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "winningProposal",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "winningProposal_",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ]
+    const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+    const contract = new ethers.Contract(contractAddress, abi, customProvider);
 
-    const signer = await customProvider.getSigner();
+
     setIsSending(true);
-    try {
+    //create vote transaction 
+ 
       const tx = {
-        to: recipientAddress,
-        value: parseEther("0.01").toString(),
+        to: contractAddress,
+        data: contract.interface.encodeFunctionData("vote", [1]),
       };
+        
+      // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
+      const feeQuotesResult = await smartAccount?.getFeeQuotes(tx);
+      console.log("Fee quotes result:", feeQuotesResult);
+      const { userOp, userOpHash } =
+        feeQuotesResult?.verifyingPaymasterGasless || {};
 
-      const txResponse = await signer.sendTransaction(tx);
-      const txReceipt = await txResponse.wait();
+      if (userOp && userOpHash) {
+        const txHash =
+          (await smartAccount?.sendUserOperation({
+            userOp,
+            userOpHash,
+          })) || null;
 
-      setTransactionHash(txReceipt?.hash || null);
+        setTransactionHash(txHash);
+        console.log("Transaction sent:", txHash);
+      } else {
+        console.error("User operation is undefined");
+      }
     } catch (error) {
-      console.error("Failed to send transaction using ethers.js:", error);
+      console.error("Failed to send transaction:", error);
     } finally {
       setIsSending(false);
     }
