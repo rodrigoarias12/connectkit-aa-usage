@@ -12,7 +12,7 @@ import { EntryPosition, wallet } from "@particle-network/connectkit/wallet";
 import { aa } from "@particle-network/connectkit/aa";
 // aa end
 // evm start
-import { base, baseSepolia, bscTestnet } from "@particle-network/connectkit/chains";
+import { base, baseSepolia, bscTestnet ,polygonAmoy} from "@particle-network/connectkit/chains";
 import {
   evmWalletConnectors,
   passkeySmartWallet,
@@ -81,7 +81,7 @@ const config = createConfig({
     }),
     // aa config end
   ],
-  chains: [bscTestnet],
+  chains: [polygonAmoy],
 });
 
 // Wrap your application with this component.
