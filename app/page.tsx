@@ -117,6 +117,7 @@ export default function Home() {
   const executeTxNative = async () => {
     console.log("Sending transaction...");
     setIsSending(true);
+    
     try {
       const tx = {
         to: recipientAddress,
@@ -306,15 +307,15 @@ export default function Home() {
         }
       ]
     const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
-    const contract = new ethers.Contract(contractAddress, abi, customProvider);
-
+    const ballotInterface = new ethers.Interface(abi);
+    const datatx = ballotInterface.encodeFunctionData("vote", [1]);
 
     setIsSending(true);
     //create vote transaction 
    try{
       const tx = {
         to: contractAddress,
-        data: contract.interface.encodeFunctionData("vote", [1]),
+        data: datatx,
       };
         
       // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
