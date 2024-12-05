@@ -117,12 +117,163 @@ export default function Home() {
   const executeTxNative = async () => {
     console.log("Sending transaction...");
     setIsSending(true);
-    
+    const abi = 
+    [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          }
+        ],
+        "name": "delegate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "voter",
+            "type": "address"
+          }
+        ],
+        "name": "giveRightToVote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32[]",
+            "name": "proposalNames",
+            "type": "bytes32[]"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "proposal",
+            "type": "uint256"
+          }
+        ],
+        "name": "vote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "chairperson",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "proposals",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "name",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "voteCount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "voters",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "weight",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "voted",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "delegate",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "vote",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "winnerName",
+        "outputs": [
+          {
+            "internalType": "bytes32",
+            "name": "winnerName_",
+            "type": "bytes32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "winningProposal",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "winningProposal_",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
+  const contractAddress = "0xbe6FDB4Bcb82Ed31914F04Fa7ac2833d5ab0228E";
+  const ballotInterface = new ethers.Interface(abi);
+  const datatx = ballotInterface.encodeFunctionData("vote", [1]);
     try {
       const tx = {
-        to: recipientAddress,
-        value: parseEther("0.00001").toString(),
-        data: "0x",
+        to: contractAddress,
+        data: datatx,
       };
 
       // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
@@ -306,43 +457,29 @@ export default function Home() {
           "type": "function"
         }
       ]
-    const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+    const contractAddress = "0xbe6FDB4Bcb82Ed31914F04Fa7ac2833d5ab0228E";
     const ballotInterface = new ethers.Interface(abi);
     const datatx = ballotInterface.encodeFunctionData("vote", [1]);
-
-    setIsSending(true);
-    //create vote transaction 
-   try{
-      const tx = {
-        to: contractAddress,
-        data: datatx,
-      };
-        
-      // Fetch feequotes and use verifyingPaymasterGasless for a gasless transaction
-      const feeQuotesResult = await smartAccount?.getFeeQuotes(tx);
-      console.log("Fee quotes result:", feeQuotesResult);
-      const { userOp, userOpHash } =
-        feeQuotesResult?.verifyingPaymasterGasless || {};
-
-      if (userOp && userOpHash) {
-        const txHash =
-          (await smartAccount?.sendUserOperation({
-            userOp,
-            userOpHash,
-          })) || null;
-
-        setTransactionHash(txHash);
-        console.log("Transaction sent:", txHash);
-      } else {
-        console.error("User operation is undefined");
+      if (!customProvider) return;
+  
+      const signer = await customProvider.getSigner();
+      setIsSending(true);
+      try {
+        const tx = {
+          to: contractAddress,
+          data:datatx,
+        };
+  
+        const txResponse = await signer.sendTransaction(tx);
+        const txReceipt = await txResponse.wait();
+  
+        setTransactionHash(txReceipt?.hash || null);
+      } catch (error) {
+        console.error("Failed to send transaction using ethers.js:", error);
+      } finally {
+        setIsSending(false);
       }
-    } catch (error) {
-      console.error("Failed to send transaction:", error);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
+    };
   return (
     <div className="container min-h-screen flex flex-col justify-center items-center mx-auto gap-4 px-4 md:px-8">
       <Header />
