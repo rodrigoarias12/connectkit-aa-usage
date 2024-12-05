@@ -298,7 +298,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Failed to send transaction:", error);
-      setErrorMessage(error as string);
+    //  setErrorMessage(error as string);
 
     } finally {
       setIsSending(false);
@@ -480,7 +480,7 @@ export default function Home() {
         setTransactionHash(txReceipt?.hash || null);
       } catch (error) {
         console.error("Failed to send transaction using ethers.js:", error);
-        setErrorMessage(error as string);
+        //setErrorMessage(error as string);
 
       } finally {
         setIsSending(false);
@@ -490,7 +490,6 @@ export default function Home() {
     <div className="container min-h-screen flex flex-col justify-center items-center mx-auto gap-4 px-4 md:px-8">
      <div>
     {/* Otros elementos de tu componente */}
-    {errorMessage && <div className="error-message">{errorMessage}</div>}
   </div>
       <Header />
       <div className="w-full flex justify-center mt-4">
