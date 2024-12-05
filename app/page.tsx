@@ -293,7 +293,7 @@ export default function Home() {
         console.log("Transaction sent:", txHash);
       } else {
         console.error("User operation is undefined");
-        setErrorMessage(error as string);
+        
 
       }
     } catch (error) {
